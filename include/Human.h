@@ -3,6 +3,7 @@
 
 #include <stack>
 #include <vector>
+#include <map>
 #include <GL/glew.h>
 
 #include "Cone.h"
@@ -18,19 +19,21 @@ class BodyPart
         ~BodyPart();
 
         glm::mat4 getMatrix() const { return matrix; }
-        const std::vector<BodyPart*>& getChilds() { return childs; }
         void setMatrix(glm::mat4 const& m) { matrix = m; }
         BodyPart* addChild(BodyPart* bp) { childs.push_back(bp); return bp; }
 
         void Render(GLint uMV);
 
-        static std::stack<glm::mat4> matrices;
     private:
         GLuint vaoID = 0;
         GLuint vboID = 0;
         unsigned int nbVert;
         std::vector<BodyPart*> childs;
         glm::mat4 matrix;
+
+        static std::stack<glm::mat4> matrices;
+
+        friend class Human;
 };
 
 class Human
@@ -47,6 +50,7 @@ class Human
         glm::mat4 projection;
         glm::mat4 view;
         GLint uMV;
+        std::map<std::string, BodyPart*> parts;
 };
 
 
