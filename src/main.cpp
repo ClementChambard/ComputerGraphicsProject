@@ -11,7 +11,11 @@
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp>
 
+#include <stack>
+
 #include "Shader.h"
+
+#include "Human.h"
 
 #include "logger.h"
 
@@ -65,57 +69,11 @@ int main(int argc, char *argv[])
     //From here you can load your OpenGL objects, like VBO, Shaders, etc.
     //TODO
 
-    unsigned int bufferSize = 18;
-    float buffer[] = { -1, -1, 0,
-                        1, -1, 0,
-                        0,  1, 0,
-                        1,  0, 0,
-                        0,  1, 0,
-                        0,  0, 1 };
-    unsigned int nbVertices = 3;
+
+    Human* human = new Human();
+    float t = 0;
 
     bool isOpened = true;
-
-    FILE* vertShader = fopen("Shaders/color.vert", "r");
-    FILE* fragShader = fopen("Shaders/color.frag", "r");
-
-    Shader* shader = Shader::loadFromFiles(vertShader, fragShader);
-
-    fclose(vertShader);
-    fclose(fragShader);
-
-    if (shader == NULL)
-    {
-        ERROR("Shader failed to load\n");
-        return EXIT_FAILURE;
-    }
-
-    GLuint vaoID;
-    glGenVertexArrays(1, &vaoID);
-    glBindVertexArray(vaoID);
-
-      GLuint bufferID;
-      glGenBuffers(1, &bufferID);
-      glBindBuffer(GL_ARRAY_BUFFER, bufferID);
-
-        glBufferData(GL_ARRAY_BUFFER, bufferSize*sizeof(float), buffer, GL_STATIC_DRAW);
-        //GLint vPosition = glGetAttribLocation(shader->getProgramID(), "vPosition");
-        //GLint vColor = glGetAttribLocation(shader->getProgramID(), "vColor");
-        glVertexAttribPointer(/*vPosition*/ 0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        glVertexAttribPointer(/*vColor*/ 1, 3, GL_FLOAT, GL_FALSE, 0, INDICE_TO_PTR(3*nbVertices*sizeof(float)));
-        glEnableVertexAttribArray(/*vPosition*/ 0);
-        glEnableVertexAttribArray(/*vColor*/ 1);
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(0);
-
-    GLint uMVP = glGetUniformLocation(shader->getProgramID(), "uMVP");
-
-    glm::mat4 matrix = glm::mat4(1.f);
-    matrix = glm::translate(matrix, glm::vec3(0.5f, 0.f, 0.f));
-    matrix = glm::scale(matrix, glm::vec3(0.5f));
-
     //Main application loop
     while(isOpened)
     {
@@ -150,13 +108,11 @@ int main(int argc, char *argv[])
 
 
         //TODO rendering
-        glUseProgram(shader->getProgramID());
-        glBindVertexArray(vaoID);
-        glUniformMatrix4fv(uMVP, 1, GL_FALSE, &(matrix[0][0]));
+        human->Render(t+=0.01);
 
-        glDrawArrays(GL_TRIANGLES, 0, nbVertices);
-        glBindVertexArray(0);
-        glUseProgram(0);
+
+
+
 
         //Display on screen (swap the buffer on screen and the buffer you are drawing on)
         SDL_GL_SwapWindow(window);
@@ -170,11 +126,7 @@ int main(int argc, char *argv[])
     }
     
     //Free everything
-
-    delete shader;
-    glDeleteBuffers(1, &bufferID);
-    glDeleteVertexArrays(1, &vaoID);
-
+    delete human;
     if(context != NULL)
         SDL_GL_DeleteContext(context);
     if(window != NULL)
