@@ -18,7 +18,6 @@ class BodyPart
         BodyPart(Geometry* g, glm::mat4 m);
         ~BodyPart();
 
-        glm::mat4 getMatrix() const { return matrix; }
         void setMatrix(glm::mat4 const& m) { matrix = m; }
         BodyPart* addChild(BodyPart* bp) { childs.push_back(bp); return bp; }
 
