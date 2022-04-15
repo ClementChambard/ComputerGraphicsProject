@@ -16,7 +16,8 @@
 
 #include "Shader.h"
 
-#include "Human.h"
+#include "Scene.h"
+#include "Camera.h"
 
 #include "logger.h"
 
@@ -25,6 +26,8 @@
 #define FRAMERATE 60
 #define TIME_PER_FRAME_MS  (1.0f/FRAMERATE * 1e3)
 #define INDICE_TO_PTR(x) ((void*)(x))
+
+const float PI = 3.141592;
 
 int main(int argc, char *argv[])
 {
@@ -76,9 +79,66 @@ int main(int argc, char *argv[])
     //From here you can load your OpenGL objects, like VBO, Shaders, etc.
     //TODO
 
-    Human* human = new Human();
+    // create the shader and get the uniform for the model-view matrix
+    FILE* vertexFile = fopen("Shaders/color.vert", "r");
+    FILE* fragmentFile = fopen("Shaders/color.frag", "r");
+    Shader* shader = Shader::loadFromFiles(vertexFile, fragmentFile);
+    fclose(vertexFile);
+    fclose(fragmentFile);
+    if (shader == nullptr)
+    {
+        ERROR("failed to load shaders");
+        exit(1);
+    }
+    GLint uMV = glGetUniformLocation(shader->getProgramID(), "uMV");
+    GLint uP = glGetUniformLocation(shader->getProgramID(), "uP");
+    GLint uMatCol = glGetUniformLocation(shader->getProgramID(), "uMatCol");
+    GLint uMatK = glGetUniformLocation(shader->getProgramID(), "uMatK");
+    GLint uMatAlpha = glGetUniformLocation(shader->getProgramID(), "uMatAlpha");
+    GLint uLigCol = glGetUniformLocation(shader->getProgramID(), "uLigCol");
+    GLint uLigDir = glGetUniformLocation(shader->getProgramID(), "uLigDir");
+    Material::setUniformLocations(uMatK, uMatAlpha, uMatCol);
+    Light::setUniformLocations(uLigDir, uLigCol);
+
+    // set the projection matrix once
+    glm::mat4 projection = glm::perspective(PI/4.f, 800.f/600.f, 0.01f, 10000.f);
+
+    // set the constant uniforms
+    glUseProgram(shader->getProgramID());
+    glUniformMatrix4fv(uP, 1, false, glm::value_ptr(projection));
+    glUseProgram(0);
+
+    // create the light, the camera and the materials
+    Light* light = new Light({0, 0.1f, 1}, {1, 1, 1});
+    Camera* cam = new Camera();
+    Texture* texEarth = new Texture("Assets/earth.jpg");
+    Texture* texMoon = new Texture("Assets/moon.jpg");
+    Material* materialEarth = new Material(texEarth, 0.2, 0.8, 0, 10);
+    Material* materialMoon = new Material(texMoon, 0.2, 0.8, 0.3, 5);
+
+    // create the scene graph and add elements to it
+    Scene* sceneGraph = new Scene();
+
+    sceneGraph->setLight(light);
+
+    sceneGraph->addPart("earth", new SceneNode(new Sphere(32, 32), glm::mat4(1.f)));
+    sceneGraph->partSetMaterial("earth", materialEarth);
+
+    sceneGraph->addPart("moon", new SceneNode(new Sphere(32, 32), glm::mat4(1.f)));
+    sceneGraph->partSetMaterial("moon", materialMoon);
+
+    // the time for animations
     float t = 0;
 
+    bool mouseLock = false;
+    bool keyW = false;
+    bool keyA = false;
+    bool keyS = false;
+    bool keyD = false;
+    bool keyShift = false;
+    bool keySpace = false;
+    float mouseX = 0;
+    float mouseY = 0;
     bool isOpened = true;
     //Main application loop
     while(isOpened)
@@ -102,20 +162,61 @@ int main(int argc, char *argv[])
                             break;
                     }
                     break;
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym)
+                    {
+                        case SDLK_w: keyW = true; break;
+                        case SDLK_a: keyA = true; break;
+                        case SDLK_s: keyS = true; break;
+                        case SDLK_d: keyD = true; break;
+                        case SDLK_SPACE: keySpace = true; break;
+                        case SDLK_LSHIFT: keyShift = true; break;
+                        case SDLK_LCTRL: SDL_ShowCursor(mouseLock); mouseLock = !mouseLock; break;
+                        default: break;
+                    }
+                    break;
+                case SDL_KEYUP:
+                    switch (event.key.keysym.sym)
+                    {
+                        case SDLK_w: keyW = false; break;
+                        case SDLK_a: keyA = false; break;
+                        case SDLK_s: keyS = false; break;
+                        case SDLK_d: keyD = false; break;
+                        case SDLK_SPACE: keySpace = false; break;
+                        case SDLK_LSHIFT: keyShift = false; break;
+                        default: break;
+                    }
+                    break;
+                case SDL_MOUSEMOTION:
+                    mouseX = event.motion.x - WIDTH/2.f;
+                    mouseY = -event.motion.y + HEIGHT/2.f;
+                    break;
                 //We can add more event, like listening for the keyboard or the mouse. See SDL_Event documentation for more details
             }
         }
+
+        float pitch = 0.f ,yaw = 0.f;
+        if (mouseLock)
+        {
+            yaw = -mouseX / 100;
+            pitch = mouseY / 100;
+            SDL_WarpMouseInWindow(window, WIDTH/2.f, HEIGHT/2.f);
+        }
+        cam->move(pitch, yaw, (keyW - keyS) * .08f, (keyD - keyA) * .08f, (keySpace - keyShift) * .08f);
 
         //Clear the screen : the depth buffer and the color buffer
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 
-
-
-
         //TODO rendering
-        human->Render(t+=0.01);
+        sceneGraph->setViewMat(cam->getMat());
+        sceneGraph->partSetMatrices("moon", glm::scale(glm::translate(glm::rotate(glm::mat4(1.f), t/2.f, glm::vec3(.2,1,0)), glm::vec3(0,0,2)),glm::vec3(0.5f)));
+        sceneGraph->partSetMatrices("earth", glm::rotate(glm::rotate(glm::mat4(1.f), 0.2f, glm::vec3(0,0,1)), t/1.2f, glm::vec3(0,1,0)));
+        t+=0.01;
 
+        glUseProgram(shader->getProgramID());
+        sceneGraph->Render(uMV);
+        glUseProgram(0);
 
 
 
@@ -132,7 +233,13 @@ int main(int argc, char *argv[])
     }
     
     //Free everything
-    delete human;
+    delete sceneGraph;
+    delete materialEarth;
+    delete materialMoon;
+    delete texEarth;
+    delete texMoon;
+    delete cam;
+    delete light;
     if(context != NULL)
         SDL_GL_DeleteContext(context);
     if(window != NULL)

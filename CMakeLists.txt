@@ -12,7 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #C++11 in Debug mode
 set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 #Some options
 #TODO add another option if a new library is to be added (follow this)

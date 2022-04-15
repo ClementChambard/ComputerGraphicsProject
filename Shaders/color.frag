@@ -8,7 +8,6 @@ varying vec2 varyUVs;
 uniform vec3 uMatK;
 uniform vec3 uMatCol;
 uniform float uMatAlpha;
-uniform vec3 uCamPos;
 uniform vec3 uLigCol;
 uniform vec3 uLigDir;
 
@@ -19,7 +18,7 @@ uniform sampler2D uTex;
 
 void main()
 {
-    vec3 matCol = texture(uTex, varyUVs).xyz;
+    vec3 matCol = texture(uTex, varyUVs).xyz * uMatCol;
     vec3 Ambiant = uMatK.x * matCol * uLigCol;
     vec3 Diffuse = uMatK.y * max(0, dot(varyNormal, uLigDir)) * matCol * uLigCol;
     vec3 Specular = uMatK.z * pow((max(0, dot(reflect(-uLigDir, varyNormal), vec3(0,0,1)))),uMatAlpha) * uLigCol;
