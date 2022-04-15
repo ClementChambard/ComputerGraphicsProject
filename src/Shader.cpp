@@ -125,4 +125,5 @@ void Shader::bindAttributes()
 {
     glBindAttribLocation(m_programID, 0, "vPosition");
     glBindAttribLocation(m_programID, 1, "vNormal");
+    glBindAttribLocation(m_programID, 2, "vUVs");
 }

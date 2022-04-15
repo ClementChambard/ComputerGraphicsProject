@@ -1,5 +1,6 @@
 //SDL Libraries
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL_syswm.h>
 
 //OpenGL Libraries
@@ -38,6 +39,12 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    if(!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG))
+    {
+        ERROR("Could not load SDL2_image with PNG files\n");
+        return EXIT_FAILURE;
+    }
+
     //Create a Window
     SDL_Window* window = SDL_CreateWindow("VR Camera",                           //Titre
                                           SDL_WINDOWPOS_UNDEFINED,               //X Position
@@ -68,7 +75,6 @@ int main(int argc, char *argv[])
     //TODO
     //From here you can load your OpenGL objects, like VBO, Shaders, etc.
     //TODO
-
 
     Human* human = new Human();
     float t = 0;

@@ -11,6 +11,9 @@
 #include "Cube.h"
 #include "Sphere.h"
 #include "Shader.h"
+#include "Material.h"
+#include "Light.h"
+#include "Texture.h"
 
 class BodyPart
 {
@@ -19,11 +22,13 @@ class BodyPart
         ~BodyPart();
 
         void setMatrix(glm::mat4 const& m) { matrix = m; }
+        void setTexture(Texture* t) { tex = t; }
         BodyPart* addChild(BodyPart* bp) { childs.push_back(bp); return bp; }
 
         void Render(GLint uMV);
 
     private:
+        Texture* tex = nullptr;
         GLuint vaoID = 0;
         GLuint vboID = 0;
         unsigned int nbVert;
@@ -46,6 +51,8 @@ class Human
     private:
         BodyPart* root;
         Shader* shader;
+        Material* material;
+        Light* light;
         glm::mat4 projection;
         glm::mat4 view;
         GLint uMV;
