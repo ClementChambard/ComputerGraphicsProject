@@ -22,7 +22,7 @@ void Camera::move(float pitch, float yaw, float forward, float right, float up)
     if (this->yaw < 0) this->yaw += 6.28318f;
 
     lookat = glm::vec3(glm::cos(this->pitch) * glm::sin(this->yaw), glm::sin(this->pitch), glm::cos(this->pitch) * glm::cos(this->yaw));
-    glm::vec3 right_vec = glm::cross(lookat, this->up);
+    glm::vec3 right_vec = glm::normalize(glm::cross(lookat, this->up));
     glm::vec3 up2 = glm::normalize(glm::cross(right_vec, lookat));
 
     pos += glm::normalize(glm::vec3(lookat.x, 0, lookat.z)) * forward;

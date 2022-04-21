@@ -202,8 +202,9 @@ endif()
 
 
 #Scripts to copy to bin/
-file(GLOB SHADERRESOURCES
-    Shaders/*)
+file(GLOB_RECURSE SHADERRESOURCES
+    Shaders/*
+    Assets/*)
 foreach(srcfile ${SHADERRESOURCES})
     get_filename_component(dirname  "${srcfile}" DIRECTORY)
     get_filename_component(filename "${srcfile}" NAME)

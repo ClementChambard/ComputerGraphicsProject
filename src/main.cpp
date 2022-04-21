@@ -165,8 +165,8 @@ int main(int argc, char *argv[])
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym)
                     {
-                        case SDLK_w: keyW = true; break;
-                        case SDLK_a: keyA = true; break;
+                        case SDLK_z: keyW = true; break;
+                        case SDLK_q: keyA = true; break;
                         case SDLK_s: keyS = true; break;
                         case SDLK_d: keyD = true; break;
                         case SDLK_SPACE: keySpace = true; break;
@@ -178,8 +178,8 @@ int main(int argc, char *argv[])
                 case SDL_KEYUP:
                     switch (event.key.keysym.sym)
                     {
-                        case SDLK_w: keyW = false; break;
-                        case SDLK_a: keyA = false; break;
+                        case SDLK_z: keyW = false; break;
+                        case SDLK_q: keyA = false; break;
                         case SDLK_s: keyS = false; break;
                         case SDLK_d: keyD = false; break;
                         case SDLK_SPACE: keySpace = false; break;
@@ -206,7 +206,6 @@ int main(int argc, char *argv[])
 
         //Clear the screen : the depth buffer and the color buffer
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
 
         //TODO rendering
         sceneGraph->setViewMat(cam->getMat());
