@@ -14,10 +14,13 @@ class Texture {
         void bind();
         void unbind();
 
+        void getSize(int& w, int& h) { w = this->w; h = this->h; }
+
         static void setTexUni(GLint uni_tex);
 
     private:
         GLuint texID;
+        int w, h;
         static GLint uni_tex;
 };
 

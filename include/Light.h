@@ -7,18 +7,20 @@
 class Light {
 
     public:
-        Light(glm::vec3 dir, glm::vec3 col) : direction(dir), color(col), camSpaceDirection(dir) {}
+        Light(glm::vec3 pos, glm::vec3 col) : position(pos), camSpacePosition(pos), color(col) {}
 
         void sendUniforms();
         void setView(glm::mat4 const& v);
 
-        static void setUniformLocations(GLint uni_dir, GLint uni_color);
+        glm::vec3 getCamSpacePos() const { return camSpacePosition; }
+
+        static void setUniformLocations(GLint uni_pos, GLint uni_color);
 
     private:
-        glm::vec3 direction;
-        glm::vec3 camSpaceDirection;
+        glm::vec3 position;
+        glm::vec3 camSpacePosition;
         glm::vec3 color;
-        static GLint uni_dir, uni_color;
+        static GLint uni_pos, uni_color;
 };
 
 #endif // LIGHT_H_

@@ -18,6 +18,7 @@
 
 #include "Scene.h"
 #include "Camera.h"
+#include "LensFlare.h"
 
 #include "logger.h"
 
@@ -66,18 +67,12 @@ int main(int argc, char *argv[])
     glewExperimental = GL_TRUE;
     glewInit();
 
-
     //Start using OpenGL to draw something on screen
     glViewport(0, 0, WIDTH, HEIGHT); //Draw on ALL the screen
 
     //The OpenGL background color (RGBA, each component between 0.0f and 1.0f)
     glClearColor(0.0, 0.0, 0.0, 1.0); //Full Black
-
     glEnable(GL_DEPTH_TEST); //Active the depth test
-
-    //TODO
-    //From here you can load your OpenGL objects, like VBO, Shaders, etc.
-    //TODO
 
     // create the shader and get the uniform for the model-view matrix
     FILE* vertexFile = fopen("Shaders/color.vert", "r");
@@ -96,9 +91,10 @@ int main(int argc, char *argv[])
     GLint uMatK = glGetUniformLocation(shader->getProgramID(), "uMatK");
     GLint uMatAlpha = glGetUniformLocation(shader->getProgramID(), "uMatAlpha");
     GLint uLigCol = glGetUniformLocation(shader->getProgramID(), "uLigCol");
-    GLint uLigDir = glGetUniformLocation(shader->getProgramID(), "uLigDir");
+    GLint uLigPos = glGetUniformLocation(shader->getProgramID(), "uLigPos");
+    GLint uTexture = glGetUniformLocation(shader->getProgramID(), "uTex");
     Material::setUniformLocations(uMatK, uMatAlpha, uMatCol);
-    Light::setUniformLocations(uLigDir, uLigCol);
+    Light::setUniformLocations(uLigPos, uLigCol);
 
     // set the projection matrix once
     glm::mat4 projection = glm::perspective(PI/4.f, 800.f/600.f, 0.01f, 10000.f);
@@ -106,10 +102,11 @@ int main(int argc, char *argv[])
     // set the constant uniforms
     glUseProgram(shader->getProgramID());
     glUniformMatrix4fv(uP, 1, false, glm::value_ptr(projection));
+    glUniform1i(uTexture, 0);
     glUseProgram(0);
 
     // create the light, the camera and the materials
-    Light* light = new Light({0, 0.1f, 1}, {1, 1, 1});
+    Light* light = new Light({0, -0.1f, 100}, {1, 1, 1});
     Camera* cam = new Camera();
     Texture* texEarth = new Texture("Assets/earth.jpg");
     Texture* texMoon = new Texture("Assets/moon.jpg");
@@ -128,6 +125,21 @@ int main(int argc, char *argv[])
 
     sceneGraph->addPart("moon", new SceneNode(&sphere, glm::mat4(1.f)));
     sceneGraph->partSetMaterial("moon", materialMoon);
+
+
+    Texture* texLight = new Texture("Assets/light.png");
+    Texture* texLight0 = new Texture("Assets/shape_0.png");
+    Texture* texLight1 = new Texture("Assets/shape_1.png");
+    Texture* texLight2 = new Texture("Assets/shape_2.png");
+    Texture* texLight3 = new Texture("Assets/shape_3.png");
+    Texture* texLight4 = new Texture("Assets/shape_4.png");
+    Texture* texLight5 = new Texture("Assets/shape_5.png");
+    Texture* texLight6 = new Texture("Assets/shape_6.png");
+    Texture* texLight7 = new Texture("Assets/shape_7.png");
+    Texture* texLight8 = new Texture("Assets/shape_8.png");
+    LensFlare::Init();
+    LensFlare::setLight(light);
+    LensFlare::setTextures({texLight, texLight0, texLight1, texLight2, texLight3, texLight4, texLight5, texLight6, texLight7, texLight8});
 
     // the time for animations
     float t = 0;
@@ -197,6 +209,7 @@ int main(int argc, char *argv[])
             }
         }
 
+        //Update the camera
         float pitch = 0.f ,yaw = 0.f;
         if (mouseLock)
         {
@@ -209,18 +222,18 @@ int main(int argc, char *argv[])
         //Clear the screen : the depth buffer and the color buffer
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-        //TODO rendering
+        //Move the parts of the scene graph
         sceneGraph->setViewMat(cam->getMat());
         sceneGraph->partSetMatrices("moon", glm::scale(glm::translate(glm::rotate(glm::mat4(1.f), t/2.f, glm::vec3(.2,1,0)), glm::vec3(0,0,2)),glm::vec3(0.5f)));
         sceneGraph->partSetMatrices("earth", glm::rotate(glm::rotate(glm::mat4(1.f), 0.2f, glm::vec3(0,0,1)), t/1.2f, glm::vec3(0,1,0)));
         t+=0.01;
 
+        //Render everything
         glUseProgram(shader->getProgramID());
         sceneGraph->Render(uMV);
         glUseProgram(0);
 
-
-
+        LensFlare::render(projection);
 
         //Display on screen (swap the buffer on screen and the buffer you are drawing on)
         SDL_GL_SwapWindow(window);
@@ -239,6 +252,7 @@ int main(int argc, char *argv[])
     delete materialMoon;
     delete texEarth;
     delete texMoon;
+    delete texLight;
     delete cam;
     delete light;
     if(context != NULL)

@@ -21,6 +21,9 @@ Texture::Texture(std::string filename)
       glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    w = rgbImg->w;
+    h = rgbImg->h;
+
     SDL_FreeSurface(rgbImg);
 }
 
@@ -33,7 +36,6 @@ void Texture::bind()
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texID);
-    glUniform1i(uni_tex, 0);
 }
 
 void Texture::unbind()
