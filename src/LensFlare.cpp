@@ -4,6 +4,7 @@ std::vector<Texture*> LensFlare::textures;
 Light* LensFlare::mainLight;
 GLuint LensFlare::VAOid, LensFlare::VBOid;
 Shader* LensFlare::shader;
+GLuint uni_alpha = 0;
 
 void LensFlare::Init()
 {
@@ -39,6 +40,7 @@ void LensFlare::Init()
     }
 
     GLint uni_tex = glGetUniformLocation(shader->getProgramID(), "uTex");
+    uni_alpha = glGetUniformLocation(shader->getProgramID(), "uAlpha");
     glUseProgram(shader->getProgramID());
     glUniform1i(uni_tex, 0);
     glUseProgram(0);
@@ -73,16 +75,23 @@ void LensFlare::render(glm::mat4 const& proj)
 
     glm::vec2 offsetDir = glm::normalize(-glm::vec2(lightPos));
     glm::vec2 offset = glm::vec2(lightPos);
-    float offsetAmmount = glm::length(glm::vec2(lightPos)) * 2.f/(float)textures.size();
-    float width = 0.5f;
-    float height = 0.5f*800.f/600.f;
+    float offsetAmmount = glm::length(offset) * 2.f/(float)textures.size();
+    float width = 1.f;
+    float height = 1.f *800.f/600.f;
     float scaling = 1 + 0.5f/textures.size();
+    float alpha = glm::max(1.2f - glm::length(offset),0.f)/2.f;
+    float alpha2 = alpha;
+    if (alpha2 > 0.5f)
+    {
+        alpha2 = glm::max(0.5f -  6*(alpha2-0.5f),0.f);
+    }
 
     int w0, h0; textures[0]->getSize(w0, h0);
     glUseProgram(shader->getProgramID());
     glBindVertexArray(VAOid);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+    glUniform1f(uni_alpha, alpha);
     for (auto t : textures)
     {
         t->bind();
@@ -94,8 +103,6 @@ void LensFlare::render(glm::mat4 const& proj)
         glm::vec2 posBR = offset - glm::vec2(-w/2.f,  h/2.f);
         glm::vec2 posBL = offset - glm::vec2( w/2.f,  h/2.f);
 
-        std::cout << posTL.x << " " << posTL.y << "   " << posBR.x << " " << posBR.y << "\n";
-
         float Pos[] = {posTL.x, posTL.y, posBR.x, posBR.y, posTR.x, posTR.y, posTL.x, posTL.y, posBL.x, posBL.y, posBR.x, posBR.y};
 
         glBindBuffer(GL_ARRAY_BUFFER, VBOid);
@@ -106,6 +113,7 @@ void LensFlare::render(glm::mat4 const& proj)
 
         t->unbind();
 
+        if (width == 1) glUniform1f(uni_alpha, alpha2);
         width *= scaling;
         height *= scaling;
         offset += offsetDir * offsetAmmount;

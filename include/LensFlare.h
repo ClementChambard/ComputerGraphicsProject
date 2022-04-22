@@ -6,6 +6,7 @@
 #include "Light.h"
 #include "Texture.h"
 #include "Shader.h"
+#include "FrameBuffer.h"
 
 class LensFlare {
     public:

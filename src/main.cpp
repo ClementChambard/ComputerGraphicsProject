@@ -19,6 +19,7 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "LensFlare.h"
+#include "FrameBuffer.h"
 
 #include "logger.h"
 
@@ -110,8 +111,10 @@ int main(int argc, char *argv[])
     Camera* cam = new Camera();
     Texture* texEarth = new Texture("Assets/earth.jpg");
     Texture* texMoon = new Texture("Assets/moon.jpg");
+    Texture* texSun = new Texture("Assets/sun.jpg");
     Material* materialEarth = new Material(texEarth, 0.2, 0.8, 0, 10);
     Material* materialMoon = new Material(texMoon, 0.2, 0.8, 0.3, 5);
+    Material* materialSun = new Material(texSun, 1, 0, 0, 1);
 
     // create the scene graph and add elements to it
     Scene* sceneGraph = new Scene();
@@ -126,6 +129,8 @@ int main(int argc, char *argv[])
     sceneGraph->addPart("moon", new SceneNode(&sphere, glm::mat4(1.f)));
     sceneGraph->partSetMaterial("moon", materialMoon);
 
+    sceneGraph->addPart("sun", new SceneNode(&sphere, glm::scale(glm::translate(glm::mat4(1.f),glm::vec3(0, -0.1f, 100.f)),{4,4,4})));
+    sceneGraph->partSetMaterial("sun", materialSun);
 
     Texture* texLight = new Texture("Assets/light.png");
     Texture* texLight0 = new Texture("Assets/shape_0.png");
@@ -226,6 +231,7 @@ int main(int argc, char *argv[])
         sceneGraph->setViewMat(cam->getMat());
         sceneGraph->partSetMatrices("moon", glm::scale(glm::translate(glm::rotate(glm::mat4(1.f), t/2.f, glm::vec3(.2,1,0)), glm::vec3(0,0,2)),glm::vec3(0.5f)));
         sceneGraph->partSetMatrices("earth", glm::rotate(glm::rotate(glm::mat4(1.f), 0.2f, glm::vec3(0,0,1)), t/1.2f, glm::vec3(0,1,0)));
+        sceneGraph->partSetMatrices("sun", glm::scale(glm::rotate(glm::translate(glm::mat4(1.f), glm::vec3(0,.1f,100)), t/5.f, glm::vec3(0,1,0)),glm::vec3(4)));
         t+=0.01;
 
         //Render everything
