@@ -121,10 +121,12 @@ int main(int argc, char *argv[])
 
     sceneGraph->setLight(light);
 
-    sceneGraph->addPart("earth", new SceneNode(new Sphere(32, 32), glm::mat4(1.f)));
+    Sphere sphere(32, 32);
+
+    sceneGraph->addPart("earth", new SceneNode(&sphere, glm::mat4(1.f)));
     sceneGraph->partSetMaterial("earth", materialEarth);
 
-    sceneGraph->addPart("moon", new SceneNode(new Sphere(32, 32), glm::mat4(1.f)));
+    sceneGraph->addPart("moon", new SceneNode(&sphere, glm::mat4(1.f)));
     sceneGraph->partSetMaterial("moon", materialMoon);
 
     // the time for animations
