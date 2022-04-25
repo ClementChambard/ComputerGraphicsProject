@@ -9,7 +9,7 @@ uniform vec3 uMatK;
 uniform vec3 uMatCol;
 uniform float uMatAlpha;
 uniform vec3 uLigCol;
-uniform vec3 uLigDir;
+uniform vec3 uLigPos;
 
 uniform sampler2D uTex;
 
@@ -20,7 +20,8 @@ void main()
 {
     vec3 matCol = texture(uTex, varyUVs).xyz * uMatCol;
     vec3 Ambiant = uMatK.x * matCol * uLigCol;
-    vec3 Diffuse = uMatK.y * max(0, dot(varyNormal, uLigDir)) * matCol * uLigCol;
-    vec3 Specular = uMatK.z * pow((max(0, dot(reflect(-uLigDir, varyNormal), vec3(0,0,1)))),uMatAlpha) * uLigCol;
+    vec3 ligDir = normalize(varyCamSpacePos - uLigPos);
+    vec3 Diffuse = uMatK.y * max(0, dot(varyNormal, -ligDir)) * matCol * uLigCol;
+    vec3 Specular = uMatK.z * pow((max(0, dot(reflect(ligDir, varyNormal), vec3(0,0,1)))),uMatAlpha) * uLigCol;
     gl_FragColor = vec4(Ambiant + Diffuse + Specular, 1.0);
 }

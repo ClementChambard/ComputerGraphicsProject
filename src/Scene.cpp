@@ -30,8 +30,8 @@ SceneNode::SceneNode(Geometry* g, glm::mat4 m)
             glBufferSubData(GL_ARRAY_BUFFER, 2*3*sizeof(float)*nbVert,  2*sizeof(float)*nbVert, g->getUVs());
 
             glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, 0);
-            glVertexAttribPointer(1, 3, GL_FLOAT, 0, 0, (void*)(nbVert*3*sizeof(float)));
-            glVertexAttribPointer(2, 2, GL_FLOAT, 0, 0, (void*)(nbVert*3*2*sizeof(float)));
+            glVertexAttribPointer(1, 2, GL_FLOAT, 0, 0, (void*)(nbVert*3*2*sizeof(float)));
+            glVertexAttribPointer(2, 3, GL_FLOAT, 0, 0, (void*)(nbVert*3*sizeof(float)));
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glEnableVertexAttribArray(2);
